@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SEPTA Live Map</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    #map { height: 100vh; }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+  const map = L.map('map').setView([39.9526, -75.1652], 11);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  let markers = {};
+
+  async function fetchVehicles() {
+    const res = await fetch('/api/vehicles');
+    const data = await res.json();
+    console.log("Vehicles data:", data);  // confirm data
+
+    if (data.length === 0) {
+        console.log("No vehicles to display");
+        return;
+    }
+
+    data.forEach(v => {
+      if (markers[v.id]) {
+        // move existing marker
+        markers[v.id].setLatLng([v.lat, v.lon]);
+      } else {
+        // create new marker
+        const marker = L.marker([v.lat, v.lon])
+          .addTo(map)
+          .bindPopup("Train " + v.id);
+
+        markers[v.id] = marker;
+      }
+    });
+  }
+
+  fetchVehicles();
+  // update every 5 seconds
+  setInterval(fetchVehicles, 5000);
+</script>
+
+</body>
+</html>
