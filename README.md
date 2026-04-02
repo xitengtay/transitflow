@@ -7,4 +7,4 @@
 - To activate: deactivate
 
 The packages needed to run the app are in requirements.txt
-- Personal note: to updae what packaegsa re needed: pip freeze > requirements.txt
+- Personal note: to update what packages are needed: pip freeze > requirements.txt
