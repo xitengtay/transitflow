@@ -18,8 +18,11 @@ def get_vehicle_data():
             v = entity.vehicle
             vehicles.append({
                 "id": v.vehicle.id,
+                "trip_id": v.trip.trip_id,
+                "route_id": v.trip.route_id,
                 "lat": v.position.latitude,
-                "lon": v.position.longitude
+                "lon": v.position.longitude,
+                "timestamp": v.timestamp
             })
 
     return vehicles

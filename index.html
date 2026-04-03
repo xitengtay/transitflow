@@ -8,11 +8,24 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
     #map { height: 100vh; }
+    #clock {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-family: monospace;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+      z-index: 1000; /* make sure it stays above the map */
+      transition: background 0.3s ease; /* so no flicker */
+    }
   </style>
 </head>
 <body>
 
 <div id="map"></div>
+<div id="clock"></div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
@@ -23,6 +36,7 @@
   }).addTo(map);
 
   let markers = {};
+  let latestTimestamp = null;
 
   async function fetchVehicles() {
     const res = await fetch('/api/vehicles');
@@ -32,22 +46,78 @@
     if (data.length === 0) {
         console.log("No vehicles to display");
         return;
+    } else {
+      latestTimestamp = data[0].timestamp;
     }
 
     data.forEach(v => {
       if (markers[v.id]) {
         // move existing marker
         markers[v.id].setLatLng([v.lat, v.lon]);
+
+        const date = new Date(v.timestamp * 1000);
+
+        markers[v.id].setPopupContent(`
+          <b>Train:</b> ${v.id}<br>
+          <b>Route:</b> ${v.route_id}<br>
+          <b>Trip:</b> ${v.trip_id}<br>
+          <b>Last Update:</b> ${date.toLocaleTimeString()}
+        `);
       } else {
         // create new marker
+        const date = new Date(v.timestamp * 1000); // GTFS timestamps are UNIX seconds
+
+        const popupContent = `
+          <b>Train:</b> ${v.id}<br>
+          <b>Route:</b> ${v.route_id}<br>
+          <b>Trip:</b> ${v.trip_id}<br>
+          <b>Last Update:</b> ${date.toLocaleTimeString()}
+        `;
+
         const marker = L.marker([v.lat, v.lon])
           .addTo(map)
-          .bindPopup("Train " + v.id);
+          .bindPopup(popupContent);
 
         markers[v.id] = marker;
       }
     });
   }
+
+  function updateClock() {
+    const now = new Date();
+    let text = "Local: " + now.toLocaleTimeString();
+
+    let color = "white"; // default
+
+    if (latestTimestamp) {
+      const dataTime = new Date(latestTimestamp * 1000);
+      const diffSeconds = (now - dataTime) / 1000;
+
+      text += "\nData: " + dataTime.toLocaleTimeString();
+      const latency = Math.floor(diffSeconds);
+      text += `\nLag: ${latency}s`;
+
+      // freshness
+      if (diffSeconds < 30) {
+        color = "#d4edda"; // green
+      } else if (diffSeconds < 90) {
+        color = "#fff3cd"; // yellow
+      } else {
+        color = "#f8d7da"; // red
+      }
+    } else {
+      text += "\nData: N/A";
+      color = "#f8d7da";
+    }
+
+    const clock = document.getElementById("clock");
+    clock.innerText = text;
+    clock.style.background = color;
+  }
+
+  updateClock();
+  // update every second
+  setInterval(updateClock, 1000);
 
   fetchVehicles();
   // update every 5 seconds
