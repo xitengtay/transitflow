@@ -1,5 +1,9 @@
 # transitflow
 
+I wanted to teach myself:
+- using an API
+- making webpages: using HTML, Flask, etc
+
 ** Virtual Environment Testing (assuming Mac) **
 
 - To create a virtual environment: python3 -m venv <name of venv: venv>
