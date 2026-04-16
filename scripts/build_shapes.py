@@ -1,3 +1,7 @@
+import csv
+import json
+from collections import defaultdict
+
 shapes = defaultdict(list)
 
 with open("data/shapes.txt") as f:
