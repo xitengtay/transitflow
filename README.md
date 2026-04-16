@@ -12,3 +12,7 @@ I wanted to teach myself:
 
 The packages needed to run the app are in requirements.txt
 - Personal note: to update what packages are needed: pip freeze > requirements.txt
+
+*Using build_shapes.py*
+- The user doesn't have to run anything extra, but just to make sense of the script and the data folder:
+- Raw GTFS → (script) → cleaned JSON → (Flask) → frontend map

@@ -1,4 +1,5 @@
 import requests
+import json
 from flask import Flask, jsonify
 from google.transit import gtfs_realtime_pb2
 
@@ -30,6 +31,11 @@ def get_vehicle_data():
 @app.route("/api/vehicles")
 def vehicles():
     return jsonify(get_vehicle_data())
+
+@app.route("/api/shapes")
+def shapes():
+    with open("data/shapes.json") as f:
+        return jsonify(json.load(f))
 
 @app.route("/")
 def index():

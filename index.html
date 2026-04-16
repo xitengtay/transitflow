@@ -38,6 +38,19 @@
   let markers = {};
   let latestTimestamp = null;
 
+  async function drawShapes() {
+    const res = await fetch('/api/shapes');
+    const shapes = await res.json();
+
+    Object.values(shapes).forEach(coords => {
+      L.polyline(coords, {
+        color: "#555",
+        weight: 2,
+        opacity: 0.5
+      }).addTo(map);
+    });
+  }
+
   async function fetchVehicles() {
     const res = await fetch('/api/vehicles');
     const data = await res.json();
@@ -114,6 +127,8 @@
     clock.innerText = text;
     clock.style.background = color;
   }
+
+  drawShapes();
 
   updateClock();
   // update every second
